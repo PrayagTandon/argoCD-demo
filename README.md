@@ -48,18 +48,35 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 ```
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 ```
-#### use minikube tunnel or port forwarding
+#### use minikube tunnel or port forwarding (use separate terminal)
 ```
-# use in separate terminal
 minikube tunnel 
 ```
 or
 ```
-# use in separate terminal
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
-### Get argoCD admi Password
+### Get argoCD admin Password
 ```
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+### Connect with the ArgoCD CLI
+```
+argocd login localhost:8080
+```
+
+### Register the app in argoCD
+```
+argocd app create argocd-demo \
+  --repo https://github.com/PrayagTandon/argocd-demo.git \
+  --path kubefolder \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace default \
+  --sync-policy automated
+```
+
+### Check app status
+```
+argocd app get argocd-demo
 ```
