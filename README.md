@@ -18,10 +18,48 @@ chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 ```
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
-
 ```
 
 ### helm install
 ```
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+```
+
+### argoCD CLI Install
+```
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+```
+
+### start minikube and verify cluster
+```
+minikube start --driver=docker --extra-config=apiserver.service-node-port-range=1-65535
+kubectl cluster-info 
+```
+
+### ArgoCD Install
+
+```
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+### expose argoCD server
+```
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+```
+#### use minikube tunnel or port forwarding
+```
+# use in separate terminal
+minikube tunnel 
+```
+or
+```
+# use in separate terminal
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+### Get argoCD admi Password
+```
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
